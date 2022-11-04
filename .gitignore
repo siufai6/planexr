@@ -1,4 +1,5 @@
 *.pyc 
 temp/*
 trading/db.sqlite3
+db.sqlite3
 trading/migrations/*
