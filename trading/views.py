@@ -12,6 +12,8 @@ from django.contrib.auth.models import User
 
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 
 class IndexView(generic.ListView):
@@ -25,7 +27,7 @@ class IndexView(generic.ListView):
         """
         return Market.objects.all()
 
-class MarketIndexView(generic.ListView):
+class MarketIndexView(LoginRequiredMixin,generic.ListView):
     """
     Index view for the markets
     """
@@ -38,7 +40,7 @@ class MarketIndexView(generic.ListView):
         """
         return Market.objects.all()
 
-class MarketDetailView(generic.DetailView):
+class MarketDetailView(LoginRequiredMixin,generic.DetailView):
     """
     Detail view for markets (this is where the order book will be displayed)
     """
@@ -55,7 +57,7 @@ class MarketDetailView(generic.DetailView):
 
         return context
 
-class TradeIndexView(generic.ListView):
+class TradeIndexView(LoginRequiredMixin,generic.ListView):
     """
     """
     template_name = "trades/index.html"
@@ -67,21 +69,21 @@ class TradeIndexView(generic.ListView):
         """
         return Trade.objects.all().filter(owner_id=self.request.user).order_by("-last_modified")
 
-class TradeDetailView(generic.DetailView):
+class TradeDetailView(LoginRequiredMixin,generic.DetailView):
     """
     Detail view for orders, displays information on particular order
     """
     model = Trade
     template_name = "trades/detail.html"
 
-class TradeUpdateView(generic.UpdateView):
+class TradeUpdateView(LoginRequiredMixin,generic.UpdateView):
     model = Trade
     fields = ["owner", "market", "trade_date","strategy","code","derivative","type", "price", "quantity"]
     template_name = "trades/trade_form.html"
     #print(reverse('abcd:trades_list', args=(model.id)))
     success_url = reverse_lazy('trading:trades_list')
 
-class TradeCreateView(generic.CreateView):
+class TradeCreateView(LoginRequiredMixin,generic.CreateView):
     """
     """
     model = Trade
@@ -95,7 +97,7 @@ class TradeCreateView(generic.CreateView):
         return super().form_valid(form)
 
 
-class TradeDeleteView(generic.DeleteView):
+class TradeDeleteView(LoginRequiredMixin,generic.DeleteView):
     model = Trade
     template_name = "trades/trade_confirm_delete.html"
     success_url = reverse_lazy('trading:trades_list')
@@ -104,7 +106,7 @@ class TradeDeleteView(generic.DeleteView):
     #    print("form_valid")
     #    return super().form_valid(form)
 
-class PlanIndexView(generic.ListView):
+class PlanIndexView(LoginRequiredMixin,generic.ListView):
     """
     """
     template_name = "trades/plan_list.html"
@@ -116,7 +118,7 @@ class PlanIndexView(generic.ListView):
         """
         return Plan.objects.all().filter(owner_id=self.request.user).order_by("-last_modified")
 
-class PlanCreateView(generic.CreateView):
+class PlanCreateView(LoginRequiredMixin,generic.CreateView):
     """
     """
     model = Plan
@@ -130,7 +132,7 @@ class PlanCreateView(generic.CreateView):
         return super().form_valid(form)
 
 
-class PlanDeleteView(generic.DeleteView):
+class PlanDeleteView(LoginRequiredMixin,generic.DeleteView):
     model = Plan
     template_name = "trades/trade_confirm_delete.html"
     success_url = reverse_lazy('trading:plans_list')
@@ -139,7 +141,7 @@ class PlanDeleteView(generic.DeleteView):
     #    print("form_valid")
     #    return super().form_valid(form)
 
-
+@login_required
 def show_portfolio(request):
 
     df = pd.DataFrame(list(Trade.objects.all().filter(owner_id=request.user).order_by("-trade_date").values()))
