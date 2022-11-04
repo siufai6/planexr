@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
-from django.contrib.auth.decorators import login_required
+
 
 class IndexView(generic.ListView):
     """
@@ -145,13 +145,13 @@ def show_portfolio(request):
     df = pd.DataFrame(list(Trade.objects.all().filter(owner_id=request.user).order_by("-trade_date").values()))
     arr = []
     if df.empty:
-        pass
+        pass   
     else:
         print(df)
         mask = (df.type=='S')
         df.loc[mask,'quantity'] = -1*df.loc[mask,'quantity']
         costs = pd.to_numeric(df['quantity']*df['price'])
-
+    
         df= pd.concat([df, costs.rename("cost")], axis=1)
         print(df)
         grouped_df = df.groupby(by=['code_id','derivative'])['quantity','cost'].sum(numeric_only=True)
@@ -172,10 +172,10 @@ def show_portfolio(request):
     return  render(request,'trades/portfolio_list.html',contextt)
 
 
-def gen_sample_data(request):
+def gen_sample_data(request, stat_html):
 
+    import numpy as np
     start_amount = 100000
-    stat_html = './temp/profit.html'
     np.random.seed(8)
     win_loss_df = pd.DataFrame(
         np.random.choice([1000, -1000], 543),
@@ -208,8 +208,9 @@ def get_stat(request):
     import quantstats as qs
     import numpy as np
 
-    #win_loss_df = get_sample_data(request)
-    win_loss_df = get_portfolio_winloss(request)
+    stat_html = './temp/profit.html'
+    win_loss_df = gen_sample_data(request, stat_html)
+    #win_loss_df = get_portfolio_winloss(request)
     profit = win_loss_df.total_profit
 
     # Save to image file, this image can also be seen in full report.
