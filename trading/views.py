@@ -12,7 +12,7 @@ from django.contrib.auth.models import User
 
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
-
+from django.contrib.auth.decorators import login_required
 
 class IndexView(generic.ListView):
     """

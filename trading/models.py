@@ -124,13 +124,7 @@ class Trade(models.Model):
     type = models.CharField(max_length=4, choices=TRADE_TYPES)
     strategy = models.ForeignKey(Strategy, on_delete=models.CASCADE, default=1)
     trade_date = models.DateField( default=date.today)
-    code = models.ChainedForeignKey(
-        Instrument, 
-        chained_field="market",
-        chained_model_field="market", 
-        show_all=False, 
-        auto_choose=True
-    )
+    code = models.ForeignKey(Instrument, on_delete=models.CASCADE)
     derivative = models.CharField(max_length=20, default='-')
     quantity = models.IntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
