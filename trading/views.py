@@ -65,7 +65,7 @@ class TradeIndexView(generic.ListView):
         """
         Return all active orders, newest to oldest
         """
-        return Trade.objects.all().filter().order_by("-last_modified")
+        return Trade.objects.all().filter(owner_id=self.request.user).order_by("-last_modified")
 
 class TradeDetailView(generic.DetailView):
     """
@@ -143,27 +143,31 @@ class PlanDeleteView(generic.DeleteView):
 def show_portfolio(request):
 
     df = pd.DataFrame(list(Trade.objects.all().filter(owner_id=request.user).order_by("-trade_date").values()))
-    mask = (df.type=='S')
-    df.loc[mask,'quantity'] = -1*df.loc[mask,'quantity']
-    costs = pd.to_numeric(df['quantity']*df['price'])
-    
-    df= pd.concat([df, costs.rename("cost")], axis=1)
-    print(df)
-    grouped_df = df.groupby(by=['code_id','derivative'])['quantity','cost'].sum(numeric_only=True)
-    grouped_df = grouped_df[grouped_df.quantity>0]
-    print(grouped_df)
-
-    ins_df = pd.DataFrame(list(Instrument.objects.all().values()))
-    flatten_df = grouped_df.reset_index()
-    print(flatten_df)
-
-    # look up code by id and merge to df
-    flatten_df['code'] = flatten_df.merge(ins_df, left_on='code_id', right_on='id')['code']
-
-    json_records = flatten_df.to_json(orient ='records')
-    print(flatten_df)
     arr = []
-    arr = json.loads(json_records)
+    if df.empty:
+        pass
+    else:
+        print(df)
+        mask = (df.type=='S')
+        df.loc[mask,'quantity'] = -1*df.loc[mask,'quantity']
+        costs = pd.to_numeric(df['quantity']*df['price'])
+
+        df= pd.concat([df, costs.rename("cost")], axis=1)
+        print(df)
+        grouped_df = df.groupby(by=['code_id','derivative'])['quantity','cost'].sum(numeric_only=True)
+        grouped_df = grouped_df[grouped_df.quantity>0]
+        print(grouped_df)
+
+        ins_df = pd.DataFrame(list(Instrument.objects.all().values()))
+        flatten_df = grouped_df.reset_index()
+        print(flatten_df)
+
+        # look up code by id and merge to df
+        flatten_df['code'] = flatten_df.merge(ins_df, left_on='code_id', right_on='id')['code']
+
+        json_records = flatten_df.to_json(orient ='records')
+        print(flatten_df)
+        arr = json.loads(json_records)
     contextt = {'d': arr}
     return  render(request,'trades/portfolio_list.html',contextt)
 
