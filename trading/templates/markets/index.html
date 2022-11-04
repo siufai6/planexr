@@ -1,0 +1,30 @@
+{% include "header.html" %}
+<h1> Markets</h1>
+{% if global_markets_list %}
+    <table class="trades_table table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>Market</th>
+                <th>Last Modified</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for market in global_markets_list %}
+            <tr class="table-success" ></tr>
+            <td>
+                <a href="/trading/markets/{{ market.id }}">{{ market.name }}</a>
+            </td>
+            <td>{{ market.last_modified }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+        </tbody>
+    </table>
+
+{% else %}
+    <p>No markets currently available.</p>
+{% endif %}
+
+{% include "footer.html" %}
+

@@ -1,0 +1,47 @@
+{% include "header.html" %}
+
+<h1>Trades</h1>
+{% if global_trades_list %}
+    <table class="trades_table table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Market</th>
+                <th>Date</th>
+                <th>Strategy</th>
+                <th>Type</th>
+                <th>Code</th>
+                <th>Derivative</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Last Modified</th>
+                <th>Close trade</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trade in global_trades_list %}
+            <tr  class="table-success">
+                <td><a href="/trading/trades/update/{{ trade.id }}" title="View Trade #{{ trade.id }}">{{ trade.id }}</a></td>
+                <td><a href="/trading/markets/{{ trade.market.id }}" title="View Market for {{ trade.market }}">{{ trade.market }}</a></td>
+                <td>{{ trade.trade_date }}</td>
+                <td>{{ trade.strategy }}</td>
+                <td>{{ trade.get_type_display }}</td>
+                <td>{{ trade.code }}</td>
+                <td>{{ trade.derivative }}</td>
+                <td>{{ trade.price }}</td>
+                <td>{{ trade.quantity }}</td>
+                <td><a href="/trading/trades/update/{{ trade.id }}" title="View Trade #{{ trade.id }}">{{ trade.last_modified }}</td>                
+                <td> {% if trade.type == "B" %} <a href="/trading/trades/close/{{ trade.id }}" title="Close Trade #{{ trade.id }}"> Close</a> {% else %} - {% endif %}</td> 
+                <td><a href="/trading/trades/delete/{{ trade.id }}" title="Delete Trade #{{ trade.id }}"> Delete</td> 
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No active orders.</p>
+{% endif %}
+<a href="/trading/trades/create" title="Create new trade">Create new trade</a>
+
+{% include "footer.html" %}
+

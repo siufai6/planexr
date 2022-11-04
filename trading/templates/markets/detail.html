@@ -1,0 +1,32 @@
+{% include "header.html" %}
+
+<h1>Market for {{ market.name }}</h1>
+
+<h2>${{ market.price  }}</h2>
+
+<table class="order_book_table table table-bordered table-sm">
+    <thead class="thead-light">
+        <tr>
+            <th>Ask</th><th>Bid</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+            <tr>
+                <td>
+                    {% if order.type == "ASK" %}
+                        <p>${{ order.price }} for {{ order.quantity }}</p>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if order.type == "BID" %}
+                        <p>${{ order.price }} for {{ order.quantity }}</p>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% include "footer.html" %}
+

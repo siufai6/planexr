@@ -1,0 +1,18 @@
+{% include "header.html" %}
+<!-- Button trigger modal -->
+  
+  <!-- Modal -->
+        <div class="modal-body">
+            <form method="post">{% csrf_token %}
+                <div class="alert alert-warning">
+                    <strong>Warning!</strong> Are you sure you want to delete "{{ object }}"?
+                  </div>
+                {{ form }}
+                <!-- <input type="submit" value="Confirm"> --> 
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Yes</button>
+                    <button type="cancel" class="btn btn-secondary" data-dismiss="modal">No</button>
+                  </div>          
+            </form>
+        </div>
+{% include "footer.html" %}

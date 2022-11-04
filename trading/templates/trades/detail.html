@@ -1,0 +1,20 @@
+{% include "header.html" %}
+
+<h1>Trade #{{ trade.id }}</h1>
+<hr>
+<table class="trade_details_table table table-bordered">
+    <tbody> 
+        <tr><td>Last modified</td><td>{{ trade.last_modified }}</td></tr>
+        {% if trade.active == False %}
+            <tr><td>Filled</td><td>{{ trade.filled }}</td></tr>
+            <tr><td>Cancelled</td><td>{{ trade.cancelled }}</td></tr>
+        {% endif %}
+        <tr><td>Market</td><td><a href="/trading/markets/{{ trade.market.id }}" title="View Market for {{ trade.market }}">{{ trade.market }}</a></td></tr>
+        <tr><td>Type</td><td>{{ trade.type }}</td></tr>
+        <tr><td>Price</td><td>${{ trade.price }}</td></tr> 
+        <tr><td>Quantity</td><td>{{ trade.quantity }}</td></tr>
+    </tbody>
+</table>
+
+{% include "footer.html" %}
+

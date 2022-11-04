@@ -1,0 +1,39 @@
+{% include "header.html" %}
+
+<h1>Plans</h1>
+{% if global_plans_list %}
+    <table class="plans_table table table-bordered">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Date</th>
+                <th>Strategy</th>
+                <th>Code</th>
+                <th>Plan</th>
+                <th>Last Modified</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in global_plans_list %}
+            <tr  class="table-success">
+                <td><a href="/trading/plans/update/{{ plan.id }}" title="View plan #{{ plan.id }}">{{ plan.id }}</a></td>
+                <td>{{ plan.plan_date }}</td>
+                <td>{{ plan.strategy }}</td>
+                <td>{{ plan.code }}</td>
+                <td>{{ plan.details }}</td>
+                <td><a href="/trading/plans/update/{{ plan.id }}" title="View plan #{{ plan.id }}">{{ plan.last_modified }}</td>                
+                <td><a href="/trading/plans/delete/{{ plan.id }}" title="Delete plan #{{ plan.id }}"> Delete</td> 
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No active orders.</p>
+{% endif %}
+
+<a href="/trading/plans/create" title="Create new plan">Create new plan</a>
+
+
+{% include "footer.html" %}
+
