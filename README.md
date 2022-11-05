@@ -10,6 +10,8 @@ This simple app allows traders to do so.
 
 
 # TODO:
+- [ ] search functions
+- [ ] i18n support
 - [ ] add smart select to filter irrelevant choices in dropdown
 - [ ] use one model to capture plan + execute + review
 - [ ] add logic to close specific trades so to allow calculate PL per trade.  results will feed into quantstat
