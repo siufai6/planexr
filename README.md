@@ -5,7 +5,7 @@ It's crucial for every trader to have a *plan* before entering a *trade*, also t
 This simple app allows traders to do so.
 
 ### Acknowledgements:
-- Created based on  https://github.com/jmcph4/pytrade 
+- Inspired by  https://github.com/jmcph4/pytrade 
 - Portfolio analysis uses https://github.com/ranaroussi/quantstats
 
 
