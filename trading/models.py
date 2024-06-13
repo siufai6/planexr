@@ -1,4 +1,5 @@
 from datetime import datetime, date
+from decimal import Decimal
 from unittest.util import _MAX_LENGTH
 
 from django.db import models
@@ -9,6 +10,12 @@ TRADE_TYPES = [
     ('B', 'Buy'),
     ('S', 'Sell'),
 ]
+
+OPEN_CLOSE_TYPES = [
+    ('O', 'Open'),
+    ('C', 'Close'),
+]
+
 
 
 class Trader(models.Model):
@@ -49,32 +56,7 @@ class Participant(models.Model):
         return self.name
 
 
-'''
-class Order(models.Model):
-    owner = models.ForeignKey(Participant, on_delete=models.CASCADE)
-    market = models.ForeignKey(Market, on_delete=models.CASCADE)
-    type = models.CharField(max_length=4, choices=TRADE_TYPES)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    quantity = models.IntegerField()
 
-    # metadata
-    active = models.BooleanField(default=True)
-    created = models.DateTimeField(default=True)
-    filled = models.DateTimeField(blank=True, null=True)
-    cancelled = models.DateTimeField(blank=True, null=True)
-
-
-    def save(self, *args, **kwargs):
-        if not self.id:
-            self.created = datetime.now()
-
-        return super(Order, self).save(*args, **kwargs)
-
-    def __str__(self):
-        s = "Order({0}, {1}, {2}, {3}, {4})".format(str(self.owner),
-                str(self.market), self.type, self.price, self.quantity)
-        return s
-'''
 
 class Instrument(models.Model):
     id = models.AutoField(primary_key=True)
@@ -106,8 +88,30 @@ class Plan(models.Model):
     code = models.ForeignKey(Instrument, on_delete=models.CASCADE)
     plan_date = models.DateField( default=date.today)
     strategy = models.ForeignKey(Strategy, on_delete=models.CASCADE)
+    stoploss = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    targetprice= models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    quantity = models.IntegerField(blank=True, null=True)
+    current_price = models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    notional= models.DecimalField(max_digits=10, decimal_places=2,blank=True, null=True)
+    risk= models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    profit= models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     details = models.TextField()
 
+    def calculate_risk(self):
+        if self.current_price and self.stoploss and self.quantity:
+            return (Decimal(self.current_price) - Decimal(self.stoploss)) * self.quantity
+
+    def calculate_profit(self):
+        if self.current_price and self.targetprice and self.quantity:
+            return (Decimal(self.targetprice) - Decimal(self.current_price)) * self.quantity
+        
+    def calculate_notional(self):
+        if self.current_price and self.quantity:
+            return Decimal(self.current_price) * self.quantity
+    notional = property(calculate_notional)  
+    risk = property(calculate_risk)  
+    profit = property(calculate_profit)  
+    
     # metadata
     last_modified = models.DateTimeField(auto_now_add=True)
 
@@ -122,6 +126,7 @@ class Trade(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     market = models.ForeignKey(Market, on_delete=models.CASCADE)
     type = models.CharField(max_length=4, choices=TRADE_TYPES)
+    openclose = models.CharField(max_length=4, choices=OPEN_CLOSE_TYPES, default='O')
     strategy = models.ForeignKey(Strategy, on_delete=models.CASCADE, default=1)
     trade_date = models.DateField( default=date.today)
     code = models.ForeignKey(Instrument, on_delete=models.CASCADE)

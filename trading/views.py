@@ -6,14 +6,20 @@ from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Market, Trade, Instrument, Plan
 
+
 import pandas as pd 
 import json
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 
-from django.forms.models import model_to_dict
+#from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+#from django import forms
+
+from .forms import PlanForm
+from .forms import TradeForm
+#from .tables import PlanTable
 
 
 class IndexView(generic.ListView):
@@ -57,17 +63,17 @@ class MarketDetailView(LoginRequiredMixin,generic.DetailView):
 
         return context
 
-class TradeIndexView(LoginRequiredMixin,generic.ListView):
+class TradeListView(LoginRequiredMixin,generic.ListView):
     """
     """
-    template_name = "trades/index.html"
+    template_name = "trades/trade_list.html"
     context_object_name = "global_trades_list"
 
     def get_queryset(self):
         """
         Return all active orders, newest to oldest
         """
-        return Trade.objects.all().filter(owner_id=self.request.user).order_by("-last_modified")
+        return Trade.objects.all().filter(owner_id=self.request.user).order_by("code", "trade_date")
 
 class TradeDetailView(LoginRequiredMixin,generic.DetailView):
     """
@@ -78,7 +84,7 @@ class TradeDetailView(LoginRequiredMixin,generic.DetailView):
 
 class TradeUpdateView(LoginRequiredMixin,generic.UpdateView):
     model = Trade
-    fields = ["owner", "market", "trade_date","strategy","code","derivative","type", "price", "quantity"]
+    fields = ["market", "trade_date","strategy","code","derivative","type", "price", "quantity"]
     template_name = "trades/trade_form.html"
     #print(reverse('abcd:trades_list', args=(model.id)))
     success_url = reverse_lazy('trading:trades_list')
@@ -87,7 +93,7 @@ class TradeCreateView(LoginRequiredMixin,generic.CreateView):
     """
     """
     model = Trade
-    fields = ["market", "trade_date","strategy","code","derivative","type", "price", "quantity"]
+    fields = ["market", "trade_date","strategy","code","derivative","type", "openclose", "price", "quantity"]
     template_name = "trades/trade_form.html"
     success_url = reverse_lazy('trading:trades_list')
 
@@ -96,6 +102,31 @@ class TradeCreateView(LoginRequiredMixin,generic.CreateView):
         form.instance.owner=self.request.user
         return super().form_valid(form)
 
+class TradeCreateFromPlanView(TradeCreateView):
+
+    def get_initial(self):
+        plan = get_object_or_404(Plan, pk=self.kwargs.get('pk'))
+        return {
+            'market': plan.market,
+            'strategy': plan.strategy,
+            'code': plan.code,
+            'openclose':'O'
+        }
+    
+
+class CloseTradeView(TradeCreateView):
+
+    def get_initial(self):
+        plan = get_object_or_404(Trade, pk=self.kwargs.get('pk'))
+        return {
+            'market': plan.market,
+            'strategy': plan.strategy,
+            'code': plan.code,
+            'type': 'B' if plan.type=='S' else 'S',
+            'openclose':'C',
+            'closes_trade_id': self.kwargs.get('pk'),
+            'quantity': plan.quantity,
+        }
 
 class TradeDeleteView(LoginRequiredMixin,generic.DeleteView):
     model = Trade
@@ -106,11 +137,12 @@ class TradeDeleteView(LoginRequiredMixin,generic.DeleteView):
     #    print("form_valid")
     #    return super().form_valid(form)
 
-class PlanIndexView(LoginRequiredMixin,generic.ListView):
+
+class PlanListView(LoginRequiredMixin,generic.ListView):
     """
     """
     template_name = "trades/plan_list.html"
-    context_object_name = "global_plans_list"
+    context_object_name = "global_plan_list"
 
     def get_queryset(self):
         """
@@ -118,19 +150,34 @@ class PlanIndexView(LoginRequiredMixin,generic.ListView):
         """
         return Plan.objects.all().filter(owner_id=self.request.user).order_by("-last_modified")
 
+
+
+        
 class PlanCreateView(LoginRequiredMixin,generic.CreateView):
     """
     """
-    model = Plan
-    fields = [ "market", "plan_date","strategy","code","details"]
+    form_class = PlanForm
     template_name = "trades/plan_form.html"
     success_url = reverse_lazy('trading:plans_list')
+    #fields = [ "market", "plan_date","strategy","code","stoploss","targetprice","quantity","current_price", "notional","details"]
 
     def form_valid(self, form):
         print("form_valid")
         form.instance.owner=self.request.user
         return super().form_valid(form)
 
+class PlanUpdateView(LoginRequiredMixin,generic.UpdateView):
+    model=Plan
+    form_class = PlanForm
+    #fields = ["owner", "market", "plan_date","strategy","code","details"]
+    template_name = "trades/plan_form.html"
+    #print(reverse('abcd:trades_list', args=(model.id)))
+    success_url = reverse_lazy('trading:plans_list')
+    def form_valid(self, form):
+        print("form_valid")
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+    
 
 class PlanDeleteView(LoginRequiredMixin,generic.DeleteView):
     model = Plan
@@ -140,6 +187,8 @@ class PlanDeleteView(LoginRequiredMixin,generic.DeleteView):
     #def form_valid(self, form):
     #    print("form_valid")
     #    return super().form_valid(form)
+
+
 
 @login_required
 def show_portfolio(request):
@@ -156,7 +205,7 @@ def show_portfolio(request):
     
         df= pd.concat([df, costs.rename("cost")], axis=1)
         print(df)
-        grouped_df = df.groupby(by=['code_id','derivative'])['quantity','cost'].sum(numeric_only=True)
+        grouped_df = df.groupby(by=['code_id','derivative'])[['quantity','cost']].sum(numeric_only=True)
         grouped_df = grouped_df[grouped_df.quantity>0]
         print(grouped_df)
 
@@ -227,3 +276,6 @@ def get_stat(request):
     contextt = {}
     html_content = open(stat_html)
     return HttpResponse(html_content)
+
+
+

@@ -1,27 +1,39 @@
 {% include "header.html" %}
 
 <h1>Plans</h1>
-{% if global_plans_list %}
+{% if global_plan_list %}
     <table class="plans_table table table-bordered">
         <thead class="thead-light">
             <tr>
                 <th>ID</th>
+                <th>Trade</th>
                 <th>Date</th>
                 <th>Strategy</th>
                 <th>Code</th>
                 <th>Plan</th>
+                <th>SL</th>
+                <th>TP</th>
+                <th>Risk</th>
+                <th>Profit</th>
+                <th>Notional</th>
                 <th>Last Modified</th>
                 <th>Delete</th>
             </tr>
         </thead>
         <tbody>
-            {% for plan in global_plans_list %}
+            {% for plan in global_plan_list  %}
             <tr  class="table-success">
                 <td><a href="/trading/plans/update/{{ plan.id }}" title="View plan #{{ plan.id }}">{{ plan.id }}</a></td>
+                <td><a href="/trading/trades/create_from_plan/{{ plan.id }}" title="create trade based on plan #{{ plan.id }}">Trade</a></td>
                 <td>{{ plan.plan_date }}</td>
                 <td>{{ plan.strategy }}</td>
                 <td>{{ plan.code }}</td>
                 <td>{{ plan.details }}</td>
+                <td>{{ plan.stoploss }}</td>
+                <td>{{ plan.targetprice }}</td>
+                <td>{{ plan.risk }}</td>
+                <td>{{ plan.profit }}</td>
+                <td>{{ plan.notional }}</td>
                 <td><a href="/trading/plans/update/{{ plan.id }}" title="View plan #{{ plan.id }}">{{ plan.last_modified }}</td>                
                 <td><a href="/trading/plans/delete/{{ plan.id }}" title="Delete plan #{{ plan.id }}"> Delete</td> 
                 </tr>
@@ -29,7 +41,7 @@
         </tbody>
     </table>
 {% else %}
-    <p>No active orders.</p>
+    <p>No active plans.</p>
 {% endif %}
 
 <a href="/trading/plans/create" title="Create new plan">Create new plan</a>

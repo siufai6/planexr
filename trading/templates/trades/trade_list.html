@@ -32,7 +32,7 @@
                 <td>{{ trade.price }}</td>
                 <td>{{ trade.quantity }}</td>
                 <td><a href="/trading/trades/update/{{ trade.id }}" title="View Trade #{{ trade.id }}">{{ trade.last_modified }}</td>                
-                <td> {% if trade.type == "B" %} <a href="/trading/trades/close/{{ trade.id }}" title="Close Trade #{{ trade.id }}"> Close</a> {% else %} - {% endif %}</td> 
+                <td> {% if trade.openclose == "O" %} <a href="/trading/trades/close_trade/{{ trade.id }}" title="Close Trade #{{ trade.id }}"> Close</a> {% else %} - {% endif %}</td> 
                 <td><a href="/trading/trades/delete/{{ trade.id }}" title="Delete Trade #{{ trade.id }}"> Delete</td> 
                 </tr>
             {% endfor %}

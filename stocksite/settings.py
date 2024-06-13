@@ -25,12 +25,13 @@ SECRET_KEY = 'this is a secret key'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.41.55.165','planexr.ml']
+ALLOWED_HOSTS = ['localhost']
 
 # Application definition
 
 INSTALLED_APPS = [
     'trading',
+    'django_tables2',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -126,3 +127,6 @@ STATIC_ROOT = "/home/ubuntu/stocksite/static/"
 
 LOGIN_REDIRECT_URL = "/trading/"
 
+DJANGO_TABLES2_TEMPLATE="django_tables2/bootstrap5-responsive.html"
+#DJANGO_TABLES2_TEMPLATE="django_tables2/table.html"
+#DJANGO_TABLES2_TEMPLATE="django_tables2/semantic.html"
